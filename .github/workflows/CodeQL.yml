@@ -1,31 +1,13 @@
-name: "Workflow CodeQL Scan"
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  schedule:
-    # POSIX cron syntax for a weekly scan
-    - cron: '30 1 * * 0'
-
-permissions:
-  # Required for all workflows
-  security-events: write
-
-  # Only required for workflows in private repositories
-  actions: read
-  contents: read
-
-jobs:
-  workflow-scan:
+  create-matrix:
     runs-on: ubuntu-latest
-
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.languages }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: Get languages from repo
+        id: set-matrix
+        uses: advanced-security/set-codeql-language-matrix@v1
         with:
-          persist-credentials: false
+          access-token: ${{ secrets.GITHUB_TOKEN }}
+          endpoint: ${{ github.event.repository.languages_url }}
+          exclude: 'java, python'
 
-      - name: Perform CodeQL Analysis
-        uses: rcowsill/workflow-scan-action@v1
